@@ -40,3 +40,22 @@ jobs:
       with:
         name: app-bundle
         path: app/build/outputs/bundle/release/app-release.aab
+
+    - name: Sign APK
+      uses: r0adkll/sign-android-release@v1
+      id: sign_apk
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Example Release
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-signed
+        files: |
+          ${{ steps.sign_app.signedReleaseFile0 }}
+          ${{ steps.sign_app.signedReleaseFile1 }}
+          ${{ steps.sign_app.signedReleaseFile2 }}
