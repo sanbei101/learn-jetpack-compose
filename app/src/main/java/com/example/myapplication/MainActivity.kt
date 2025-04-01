@@ -3,117 +3,109 @@ package com.example.myapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.myapplication.ui.theme.MyApplicationTheme
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.ui.graphics.Color
-
-data class TodoItem(val id: Int, val task: String)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                TodoApp()
+                App()
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+object AppScreens {
+    const val Home = "home"
+    const val User = "user/{name}"
+}
+
 @Composable
-fun TodoApp() {
-    var tasks by remember { mutableStateOf(listOf<TodoItem>()) }
-    var newTask by remember { mutableStateOf("") }
-    var idCounter by remember { mutableIntStateOf(0) }
+fun App() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = AppScreens.Home) {
+        composable(AppScreens.Home) {
+            HomeScreen(navController)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("To-Do App") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                if (newTask.isNotBlank()) {
-                    tasks = tasks + TodoItem(idCounter++, newTask)
-                    newTask = ""
-                }
-            }) {
-                Icon(Icons.Filled.Add, "Add")
-            }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
-                value = newTask,
-                onValueChange = { newTask = it },
-                label = { Text("New Task") },
-                modifier = Modifier.fillMaxWidth()
+        composable(
+            route = AppScreens.User,
+            arguments = listOf(
+                navArgument("name") {
+                    type = NavType.StringType
+                    defaultValue = "John Doe"
+                }
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = {
-                if (newTask.isNotBlank()) {
-                    tasks = tasks + TodoItem(idCounter++, newTask)
-                    newTask = ""
-                }
-            }) {
-                Text("Add Task")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn {
-                items(tasks) { task ->
-                    TodoRow(task = task, onDelete = {
-                        tasks = tasks.filter { it.id != task.id }
-                    })
-                }
-            }
+        ) { backStackEntry ->
+            UserProfile(
+                navController = navController,
+                name = backStackEntry.arguments?.getString("name") ?: "John Doe",
+            )
         }
     }
 }
 
 @Composable
-fun TodoRow(task: TodoItem, onDelete: () -> Unit) {
-    Row(
+fun HomeScreen(navController: NavController) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(16.dp)
     ) {
-        Text(text = task.task)
-        IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, "Delete", tint = Color.Red)
+        Text("Welcome to Hello World App", style = MaterialTheme.typography.headlineLarge)
+        Button(
+            onClick = {
+                navController.navigate("user/john")
+            },
+        ) {
+            Text("Go to User")
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    MyApplicationTheme {
-        TodoApp()
+fun UserProfile(
+    navController: NavController,
+    name: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            Text("Hello $name", style = MaterialTheme.typography.headlineLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    navController.popBackStack()
+                }
+            ) {
+                Text("Go, Back")
+            }
+        }
     }
 }
