@@ -29,18 +29,6 @@ jobs:
     - name: Build AAB
       run: ./gradlew bundleRelease
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release
-        path: app/build/outputs/apk/release/**/*.apk
-    
-    - name: Upload AAB
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-bundle
-        path: app/build/outputs/bundle/release/app-release.aab
-
     - name: Sign APK
       uses: r0adkll/sign-android-release@v1
       id: sign_apk
@@ -53,10 +41,14 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Example Release
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release-signed
-        path: |
-          ${{ steps.sign_app.signedReleaseFile0 }}
-          ${{ steps.sign_app.signedReleaseFile1 }}
+        name: app-release
+        path: app/build/outputs/apk/release/**/*.apk
+    
+    - name: Upload AAB
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-bundle
+        path: app/build/outputs/bundle/release/app-release.aab
