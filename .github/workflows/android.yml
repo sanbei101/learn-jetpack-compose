@@ -57,7 +57,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-signed
-        files: |
+        path: |
           ${{ steps.sign_app.signedReleaseFile0 }}
           ${{ steps.sign_app.signedReleaseFile1 }}
-          ${{ steps.sign_app.signedReleaseFile2 }}
